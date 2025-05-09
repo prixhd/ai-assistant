@@ -33,13 +33,7 @@ git clone https://github.com/prixhd/ai-assistant.git
 cd ai-assistant
 ```
 
-2. Установите зависимости:
-
-```bash
-pip install -r requirements.txt
-```
-
-3. Запустите приложение:
+2. Запустите приложение:
 
 ```bash
 docker-compose up --build
