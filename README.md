@@ -42,7 +42,7 @@ pip install -r requirements.txt
 3. Запустите приложение:
 
 ```bash
-streamlit run app.py
+docker-compose up --build
 ```
 
 ✅ Готово! Веб-интерфейс будет доступен по адресу: `http://localhost:8501`
