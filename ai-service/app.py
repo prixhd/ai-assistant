@@ -12,16 +12,21 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 
 response_cache = {}
 
-# Определяем хост Ollama из переменных окружения
-OLLAMA_HOST = os.environ.get("OLLAMA_HOST", "http://ollama:11434")
-AVAILABLE_MODEL = os.environ.get('MODEL_NAME', 'tinyllama')
+# Определяем хост DeepSeek из переменных окружения
+DEEPSEEK_API_URL = os.environ.get("DEEPSEEK_API_URL", "https://api.deepseek.com/v1")
+DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY", "sk-7d5ddde5e74d4e089dfaad352e4bcbc0")
+DEEPSEEK_MODEL = os.environ.get("DEEPSEEK_MODEL", "deepseek-chat")
 
-# Модель по умолчанию (компактнее, чем llama2)
-DEFAULT_MODEL = "tinyllama"
-print(f"Используем Ollama по адресу: {OLLAMA_HOST}")
+print(f"Используем DeepSeek API по адресу: {DEEPSEEK_API_URL}")
+
+# Более детальная настройка CORS
+CORS(app, resources={r"/*": {
+    "origins": "*",
+    "methods": ["GET", "POST", "OPTIONS"],
+    "allow_headers": ["Content-Type", "Authorization", "X-Requested-With"]
+}})
 
 # Системный промпт остается без изменений
-# Более короткий системный промпт для TinyLlama
 SYSTEM_PROMPT = """Ты - ассистент магазина 05.ру в Махачкале. Отвечай кратко, в дагестанском стиле.
 
 О магазине: 05.ру - сеть магазинов электроники в Дагестане, адрес: пр. Имама Шамиля, 31. 
@@ -40,131 +45,79 @@ SYSTEM_PROMPT = """Ты - ассистент магазина 05.ру в Мах�
 Доставка: бесплатно от 5000 руб по Махачкале.
 """
 
-# Проверка и загрузка модели в Ollama
-def ensure_model_available():
+# Проверка доступности DeepSeek API
+def check_deepseek_availability():
     try:
-        # Проверяем доступные модели
-        response = requests.get(f"{OLLAMA_HOST}/api/tags")
-        print(f"Ollama API response: {response.status_code}")
+        # Простой запрос для проверки доступности API
+        response = requests.get(
+            f"{DEEPSEEK_API_URL}/models",
+            headers={"Authorization": f"Bearer {DEEPSEEK_API_KEY}"},
+            timeout=5
+        )
 
         if response.status_code == 200:
-            models = response.json().get("models", [])
-            # Выводим список доступных моделей
-            print(f"Available models: {[model['name'] for model in models]}")
-
-            # Проверяем наличие нужных моделей
-            available_models = [model["name"] for model in models]
-
-            # Сначала проверяем llama2
-            if "llama2" in available_models:
-                print("Модель llama2 уже загружена")
-                return "llama2"
-
-            # Затем проверяем tinyllama
-            elif "tinyllama" in available_models:
-                print("Модель tinyllama уже загружена")
-                return "tinyllama"
-
-            # Если нет нужных моделей, пробуем загрузить tinyllama (она меньше)
-            print(f"Загружаем модель {DEFAULT_MODEL}...")
-            pull_response = requests.post(
-                f"{OLLAMA_HOST}/api/pull",
-                json={"name": DEFAULT_MODEL},
-                timeout=300  # 5 минут таймаут на загрузку
-            )
-
-            if pull_response.status_code == 200:
-                print(f"Модель {DEFAULT_MODEL} успешно загружена")
-                return DEFAULT_MODEL
-            else:
-                print(f"Ошибка при загрузке модели: {pull_response.status_code}")
-                print(pull_response.text)
-                return None
+            print("DeepSeek API доступен")
+            return True
         else:
-            print(f"Ошибка при получении тегов: {response.status_code}")
-            return None
+            print(f"Ошибка при проверке DeepSeek API: {response.status_code}")
+            print(response.text)
+            return False
     except Exception as e:
-        print(f"Ошибка при работе с Ollama API: {e}")
-        return None
+        print(f"Ошибка при подключении к DeepSeek API: {e}")
+        return False
 
-# Глобальная переменная для хранения названия доступной модели
-AVAILABLE_MODEL = None
-
-# Генерация ответа с помощью Ollama API
-def generate_with_ollama(message):
-    global AVAILABLE_MODEL, response_cache
-
+# Генерация ответа с помощью DeepSeek API
+def generate_with_deepseek(message):
     # Проверка кэша
     if message in response_cache:
         print("Ответ из кэша")
         return response_cache[message]
 
-    # Если модель еще не определена, попробуем найти доступную
-    if not AVAILABLE_MODEL:
-        AVAILABLE_MODEL = ensure_model_available()
-        if not AVAILABLE_MODEL:
-            print("Не удалось найти или загрузить модель")
-            return None
-
     try:
-        prompt = f"{SYSTEM_PROMPT}\n\nКлиент: {message}\n\nАссистент:"
-        print(f"Sending to Ollama model {AVAILABLE_MODEL}: {message}")
+        # Формируем запрос к DeepSeek API
+        payload = {
+            "model": DEEPSEEK_MODEL,
+            "messages": [
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": message}
+            ],
+            "temperature": 0.7,
+            "max_tokens": 100,
+            "top_p": 0.9
+        }
 
-        first_request_timeout = 30 if message not in response_cache else 15
+        print(f"Отправляем запрос к DeepSeek модели {DEEPSEEK_MODEL}: {message}")
 
-        # И используйте его:
         response = requests.post(
-            f"{OLLAMA_HOST}/api/generate",
-            json={
-                "model": AVAILABLE_MODEL,
-                "prompt": prompt,
-                "temperature": 0.7,
-                "max_tokens": 100,
-                "top_p": 0.9
+            f"{DEEPSEEK_API_URL}/chat/completions",
+            headers={
+                "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
+                "Content-Type": "application/json"
             },
-            timeout=first_request_timeout  # Используем увеличенный таймаут для первого запроса
+            json=payload,
+            timeout=60
         )
 
-        print(f"Ollama response status: {response.status_code}")
+        print(f"DeepSeek response status: {response.status_code}")
 
         if response.status_code == 200:
-            result = response.json().get("response", "")
+            result = response.json()
+            assistant_message = result.get("choices", [{}])[0].get("message", {}).get("content", "")
+
             # Сохраняем ответ в кэш
-            if result:
-                response_cache[message] = result
-            return result
+            if assistant_message:
+                response_cache[message] = assistant_message
+            return assistant_message
         else:
             print(f"Ошибка при генерации: {response.status_code}")
             if hasattr(response, 'text'):
                 print(f"Response text: {response.text}")
-
-            # Если модель не найдена, сбрасываем переменную AVAILABLE_MODEL
-            if response.status_code == 404:
-                AVAILABLE_MODEL = None
-
-            return None
+            error_message = f"Ошибка API: {response.status_code}"
+            return error_message
     except Exception as e:
-        print(f"Ошибка при запросе к Ollama API: {e}")
-        return None
-
-# Заглушка для тестирования без модели
-def mock_response(message):
-    message = message.lower()
-
-    if "iphone" in message or "айфон" in message:
-        return "Валлах, у нас отличный выбор iPhone! В наличии модели от iPhone 13 до 15 Pro Max, цены от 56 000 до 189 000 рублей."
-
-    elif "акци" in message or "скидк" in message:
-        return "Машаллах, сейчас у нас 'Весенняя распродажа' - скидки до 30% на технику Samsung, кэшбэк 15% на смартфоны Xiaomi, и рассрочка 0-0-24 на ноутбуки."
-
-    elif "цен" in message:
-        return "Цены в нашем магазине очень разные, зависит что именно тебя интересует. Смартфоны от 8 900, ноутбуки от 32 000, телевизоры от 19 900 рублей."
-
-    elif "магазин" in message:
-        return "05.ру - крупнейшая сеть магазинов электроники в Дагестане. Главный магазин в Махачкале на пр. Имама Шамиля, 31. Работаем ежедневно с 9:00 до 21:00."
-
-    else:
-        return "Спасибо за обращение в магазин 05.ру! Я могу рассказать о нашем ассортименте, акциях, доставке и сервисе. Что именно вас интересует, уважаемый?"
+        print(f"Ошибка при запросе к DeepSeek API: {e}")
+        error_message = f"Техническая ошибка: {str(e)}"
+        return error_message
 
 @app.route('/process', methods=['POST', 'OPTIONS'])
 def process():
@@ -179,13 +132,12 @@ def process():
         message = data.get('message', '')
         print(f"Received message: {message}")
 
-        # Пытаемся получить ответ от Ollama
-        result = generate_with_ollama(message)
+        # Получаем ответ от DeepSeek
+        result = generate_with_deepseek(message)
 
-        # Если ответ не получен, используем заглушку
-        if result is None:
-            print("Using mock response")
-            result = mock_response(message)
+        # Если результат пустой, возвращаем сообщение об ошибке
+        if not result:
+            result = "Извините, сервис временно недоступен. Пожалуйста, попробуйте позже."
 
         print(f"Sending response: {result[:100]}...")
         return jsonify({"response": result})
@@ -193,34 +145,31 @@ def process():
         print(f"General error: {e}")
         return jsonify({"error": f"Произошла ошибка: {str(e)}"}), 500
 
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+    return response
+
 @app.route('/', methods=['GET'])
 def home():
     # Проверка работоспособности
-    model = ensure_model_available()
-    if model:
-        return f"AI Service is running! Available model: {model}"
+    if check_deepseek_availability():
+        return f"AI Service is running! Using DeepSeek model: {DEEPSEEK_MODEL}"
     else:
-        return "AI Service is running, but no models are available."
+        return "AI Service is running, but DeepSeek API is not available."
 
 if __name__ == '__main__':
-    # Ждем запуска Ollama
+    # Проверяем доступность DeepSeek API
     for attempt in range(3):
-        print(f"Попытка соединения с Ollama ({attempt+1}/3)...")
-        try:
-            response = requests.get(f"{OLLAMA_HOST}/api/tags", timeout=5)
-            print(f"Соединение с Ollama установлено: {response.status_code}")
-            time.sleep(2)  # Даем время на инициализацию
+        print(f"Попытка соединения с DeepSeek API ({attempt+1}/3)...")
+        if check_deepseek_availability():
+            print("Соединение с DeepSeek API установлено")
             break
-        except Exception as e:
-            print(f"Ошибка соединения: {e}")
-            time.sleep(10)  # Ждем 10 секунд перед повторной попыткой
-
-    # Предварительно проверяем доступность модели
-    AVAILABLE_MODEL = ensure_model_available()
-    if AVAILABLE_MODEL:
-        print(f"Будет использоваться модель: {AVAILABLE_MODEL}")
-    else:
-        print("Ни одна модель не доступна, но сервис будет запущен с заглушками")
+        else:
+            print("Не удалось подключиться к DeepSeek API")
+            time.sleep(5)  # Ждем 5 секунд перед повторной попыткой
 
     port = int(os.environ.get("PORT", 5000))
     print(f"Starting server on port {port}")

@@ -5,48 +5,37 @@ services:
       - "8080:8080"
     environment:
       - AI_SERVICE_URL=http://ai-service:5000/process
+    networks:
+      - app-network
     depends_on:
       - ai-service
     restart: unless-stopped
+
 
   ai-service:
     build: ./ai-service
     ports:
       - "5001:5000"  # Порт 5001 на хосте
+    networks:
+      - app-network
     environment:
-      - OLLAMA_HOST=http://ollama:11434
-    depends_on:
-      - ollama
+      - DEEPSEEK_API_URL=https://api.deepseek.com/v1
+      - DEEPSEEK_API_KEY=sk-7d5ddde5e74d4e089dfaad352e4bcbc0
+      - DEEPSEEK_MODEL=deepseek-chat
     restart: on-failure
-
-  ollama:
-    image: ollama/ollama:latest
-    ports:
-      - "11434:11434"
-    volumes:
-      - ollama-data:/root/.ollama
-    restart: always
-    deploy:
-      resources:
-        limits:
-          cpus: '2'
-          memory: 3G
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:11434/api/tags" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 20s
 
   frontend:
     build: ./frontend
     ports:
       - "3000:80"
+    networks:
+      - app-network
     environment:
       - REACT_APP_API_URL=http://localhost:5001
     depends_on:
       - backend
     restart: unless-stopped
 
-volumes:
-  ollama-data:
+networks:
+  app-network:
+    driver: bridge
