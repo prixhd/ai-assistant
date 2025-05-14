@@ -104,19 +104,27 @@ def generate_with_deepseek(message):
             result = response.json()
             assistant_message = result.get("choices", [{}])[0].get("message", {}).get("content", "")
 
+            # Проверка на пустой или некорректный ответ
+            if not assistant_message or assistant_message.strip() == "" or len(set(assistant_message)) <= 2:
+                return "Извините, не удалось получить корректный ответ. Пожалуйста, попробуйте другой вопрос."
+
             # Сохраняем ответ в кэш
-            if assistant_message:
-                response_cache[message] = assistant_message
+            response_cache[message] = assistant_message
             return assistant_message
+        elif response.status_code == 402:
+            print("Ошибка оплаты DeepSeek API (402)")
+            # Используем заглушку вместо реального ответа API
+            fallback_response = "Извините, в данный момент сервис недоступен из-за проблем с API. Пожалуйста, попробуйте позже."
+            return fallback_response
         else:
             print(f"Ошибка при генерации: {response.status_code}")
             if hasattr(response, 'text'):
                 print(f"Response text: {response.text}")
-            error_message = f"Ошибка API: {response.status_code}"
+            error_message = f"Извините, произошла ошибка при обработке запроса (код {response.status_code}). Пожалуйста, попробуйте позже."
             return error_message
     except Exception as e:
         print(f"Ошибка при запросе к DeepSeek API: {e}")
-        error_message = f"Техническая ошибка: {str(e)}"
+        error_message = f"Извините, произошла техническая ошибка. Пожалуйста, попробуйте позже."
         return error_message
 
 @app.route('/process', methods=['POST', 'OPTIONS'])

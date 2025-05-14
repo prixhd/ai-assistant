@@ -1,0 +1,44 @@
+.mic-button {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: black;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.mic-button svg {
+  width: 24px;
+  height: 24px;
+  fill: white;
+}
+
+.mic-button.active {
+  background: linear-gradient(90deg,
+    #FF833F 0%, #FFC72F 7%, #E5FF3F 14%,
+    #90FF41 20%, #43FF91 30%, #0FFBFF 44%,
+    #4193FF 57%, #393FFF 67%, #A73BFF 79%,
+    #FF37DA 89%, #FF3E3E 100%);
+  background-size: 800% 800%;
+  animation: gradientAnimation 5s ease infinite;
+  transform: scale(1.1);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+}
+
+.mic-button:hover {
+  background-color: #333;
+}
+
+.mic-button.active:hover {
+  background-color: transparent;
+}
+
+@keyframes gradientAnimation {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}

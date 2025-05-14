@@ -1,55 +1,46 @@
-// FAQSection.js
-import React, { useState } from 'react';
-import './FAQSection.css';
+import React, { useState, useEffect } from 'react';
+import { getFaqs } from '../api/api';
+import '../styles/FAQSection.css';
 
 const FAQSection = () => {
-  const [activeIndex, setActiveIndex] = useState(null);
+  const [faqs, setFaqs] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const faqs = [
-    {
-      question: "Как пользоваться вашим сервисом?",
-      answer: "Наш сервис прост в использовании. Зарегистрируйтесь, выберите нужные опции и следуйте инструкциям на экране."
-    },
-    {
-      question: "Какие способы оплаты вы принимаете?",
-      answer: "Мы принимаем кредитные карты, PayPal и банковские переводы."
-    },
-    {
-      question: "Как долго занимает доставка?",
-      answer: "Обычно доставка занимает 2-5 рабочих дней в зависимости от вашего местоположения."
-    },
-    {
-      question: "Могу ли я вернуть товар?",
-      answer: "Да, у нас есть 30-дневная гарантия возврата. Свяжитесь с нашей службой поддержки для получения инструкций."
-    }
-  ];
+  useEffect(() => {
+    const loadFaqs = async () => {
+      try {
+        const data = await getFaqs();
+        setFaqs(data);
+      } catch (error) {
+        console.error('Error loading FAQs:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  const toggleFAQ = (index) => {
-    setActiveIndex(activeIndex === index ? null : index);
-  };
+    loadFaqs();
+  }, []);
+
+  if (isLoading) {
+    return <div className="faq-loading">Загрузка часто задаваемых вопросов...</div>;
+  }
 
   return (
     <div className="faq-section">
       <h2>Часто задаваемые вопросы</h2>
-      <div className="faq-list">
-        {faqs.map((faq, index) => (
-          <div
-            className={`faq-item ${activeIndex === index ? 'active' : ''}`}
-            key={index}
-          >
-            <div
-              className="faq-question"
-              onClick={() => toggleFAQ(index)}
-            >
-              {faq.question}
-              <span className="faq-icon">{activeIndex === index ? '−' : '+'}</span>
+
+      {faqs.length === 0 ? (
+        <p>Нет доступных вопросов и ответов.</p>
+      ) : (
+        <div className="faq-list">
+          {faqs.map((faq, index) => (
+            <div key={index} className="faq-item">
+              <h3>{faq.question}</h3>
+              <p>{faq.answer}</p>
             </div>
-            {activeIndex === index && (
-              <div className="faq-answer">{faq.answer}</div>
-            )}
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
