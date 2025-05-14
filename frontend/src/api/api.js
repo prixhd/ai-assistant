@@ -21,6 +21,14 @@ export const sendMessage = async (message) => {
     });
 
     console.log('AI response received:', response.data);
+
+    // Очищаем ответ от "undefined"
+    if (response.data && response.data.response) {
+      if (typeof response.data.response === 'string' && response.data.response.endsWith('undefined')) {
+        response.data.response = response.data.response.replace(/undefined$/, '');
+      }
+    }
+
     return response.data;
   } catch (error) {
     console.error('Error sending message:', error);

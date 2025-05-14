@@ -30,7 +30,6 @@ const ChatInterface = ({ isOpen, onClose }) => {
   }, [isOpen, onClose]);
 
   // Обработка отправки сообщения
-  // Обработка отправки сообщения
   const handleSendMessage = async (text) => {
     if (!text.trim()) return;
 
@@ -46,32 +45,31 @@ const ChatInterface = ({ isOpen, onClose }) => {
 
       // Добавляем ответ AI
       if (response && response.response) {
-        const aiResponse = response.response;
+        // Очищаем ответ от возможного "undefined" в конце
+        let aiResponse = response.response;
 
-        // Проверяем, что ответ не содержит только повторяющиеся символы
-        const isRepeatingChars = /^(.)\1+$/.test(aiResponse);
-        const isErrorMessage = aiResponse.startsWith("Ошибка API:") ||
-                               aiResponse.startsWith("Техническая ошибка:") ||
-                               aiResponse.includes("недоступен");
+        // Проверяем, что ответ не содержит "undefined"
+        if (typeof aiResponse === 'string') {
+          // Удаляем "undefined" в конце строки
+          aiResponse = aiResponse.replace(/undefined$/, '');
 
-        if (isRepeatingChars) {
-          console.error('Received repeating characters response:', aiResponse);
-          const aiMessage = {
-            text: "Извините, произошла ошибка при обработке ответа. Пожалуйста, попробуйте еще раз.",
-            isUser: false
+          // Исправляем типичные опечатки
+          const typoCorrections = {
+            "Врианты": "Варианты",
+            "Заскамиь": "Заскочи",
+            "хошь": "хочешь",
+            "тыщ": "тысяч",
+            "Всь": "Вот",
+            "Валейкум": "Ваалейкум"
           };
-          setMessages(prev => [...prev, aiMessage]);
-        } else if (isErrorMessage) {
-          // Обрабатываем сообщения об ошибках от API
-          const aiMessage = {
-            text: "Извините, сервис временно недоступен. Пожалуйста, попробуйте позже.",
-            isUser: false
-          };
-          setMessages(prev => [...prev, aiMessage]);
-        } else {
-          const aiMessage = { text: aiResponse, isUser: false };
-          setMessages(prev => [...prev, aiMessage]);
+
+          Object.entries(typoCorrections).forEach(([typo, correction]) => {
+            aiResponse = aiResponse.replace(new RegExp(typo, 'g'), correction);
+          });
         }
+
+        const aiMessage = { text: aiResponse, isUser: false };
+        setMessages(prev => [...prev, aiMessage]);
       } else {
         throw new Error('Invalid response format');
       }
