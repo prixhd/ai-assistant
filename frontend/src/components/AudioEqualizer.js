@@ -103,17 +103,17 @@ const AudioEqualizer = ({ isActive }) => {
     const dpr = window.devicePixelRatio || 1;
 
     // Устанавливаем размеры canvas с учетом плотности пикселей
-    canvas.width = 250 * dpr;
-    canvas.height = 150 * dpr;
+    canvas.width = 200 * dpr; // Уменьшаем ширину canvas
+    canvas.height = 100 * dpr; // Уменьшаем высоту canvas
     ctx.scale(dpr, dpr);
 
     // Определяем параметры эквалайзера
     const numBars = 4;
-    const dotRadius = 6;
+    const dotRadius = 4; // Уменьшаем размер точек
     const barWidth = dotRadius * 2; // Ширина полосы равна диаметру точки
-    const spacing = 22; // Уменьшаем расстояние между точками
-    const startX = (250 - (numBars - 1) * spacing) / 2;
-    const centerY = 75;
+    const spacing = 16; // Уменьшаем расстояние между точками
+    const startX = (200 - (numBars - 1) * spacing) / 2;
+    const centerY = 50; // Центрируем по новой высоте
 
     // Полный набор цветов градиента
     const colors = {
@@ -194,7 +194,7 @@ const AudioEqualizer = ({ isActive }) => {
         barValuesRef.current[i] = smoothValue(targetValue, barValuesRef.current[i]);
 
         // Определяем высоту полос (с ограничением)
-        const maxBarHeight = 35; // Максимальная высота полосы
+        const maxBarHeight = 25; // Уменьшаем максимальную высоту полосы
         const barHeight = barValuesRef.current[i] * maxBarHeight;
 
         // Отрисовываем полосу только если она видима
@@ -249,7 +249,7 @@ const AudioEqualizer = ({ isActive }) => {
       <canvas
         ref={canvasRef}
         className="equalizer-canvas"
-        style={{ width: '250px', height: '150px' }}
+        style={{ width: '200px', height: '100px' }} // Уменьшаем размеры canvas
       />
     </div>
   );

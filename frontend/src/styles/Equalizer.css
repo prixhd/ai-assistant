@@ -1,14 +1,11 @@
-/* src/styles/Equalizer.css */
 .equalizer-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 150px;
-  width: 250px;
-  position: relative;
-  margin: 0 auto;
+  height: 100px;
 }
 
 .equalizer-canvas {
   display: block;
+  background-color: white;
 }

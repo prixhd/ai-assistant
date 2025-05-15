@@ -6,66 +6,69 @@
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
-  align-items: center;
   justify-content: center;
-  z-index: 1001;
-  animation: fadeIn 0.3s ease;
+  align-items: center;
+  z-index: 1000;
 }
 
 .chat-modal {
-  width: 70%;
-  height: 80%;
-  max-width: 900px;
+  width: 80%;
+  height: 85%;
+  max-width: 1000px;
   background-color: white;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  border-radius: 24px; /* Уменьшенный радиус скругления */
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  animation: slideUp 0.3s ease;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
 .chat-header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
   padding: 15px 20px;
+  background: white;
+  color: #2A2A37;
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .chat-title {
   font-weight: 700;
-  font-size: 18px;
+  font-size: 14px;
+  font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color: #2A2A37;
-  display: flex;
-  align-items: center;
+  padding: 10px;
   background: linear-gradient(0deg, rgba(255, 255, 255, 0.80) 0%, rgba(255, 255, 255, 0.80) 100%),
-              linear-gradient(129deg, rgba(49, 187, 255, 0.80) 0%, rgba(150, 118, 255, 0.80) 25%,
-              rgba(190, 100, 254, 0.80) 41%, rgba(225, 87, 203, 0.80) 52%,
-              rgba(239, 87, 148, 0.80) 62%, rgba(253, 104, 63, 0.80) 70%,
-              rgba(254, 124, 43, 0.80) 85%, rgba(255, 161, 11, 0.80) 100%);
-  background-blend-mode: hard-light, normal;
-  padding: 8px 15px;
+              linear-gradient(129deg, rgba(49.19, 187.54, 255, 0.80) 0%, rgba(150, 118, 255, 0.80) 25%,
+              rgba(190, 100, 254, 0.80) 41%, rgba(225, 87, 203, 0.80) 52%, rgba(239, 87, 148, 0.80) 62%,
+              rgba(253, 104, 63, 0.80) 70%, rgba(254, 124, 43, 0.80) 85%, rgba(255, 161, 11, 0.80) 100%);
+  background-blend-mode: hard_light, normal;
   border-radius: 18px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  outline: 1px #C2D2FF solid;
+  backdrop-filter: blur(20px);
 }
 
-.close-button {
+.chat-controls {
+  display: flex;
+  gap: 10px;
+}
+
+.close-button, .clear-button {
   background: none;
   border: none;
+  color: #2A2A37;
   cursor: pointer;
-  color: #666;
-  width: 34px;
-  height: 34px;
+  padding: 5px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.2s;
 }
 
-.close-button:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+.close-button:hover, .clear-button:hover {
+  background-color: rgba(0, 0, 0, 0.1);
 }
 
 .chat-content {
@@ -73,102 +76,95 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background-color: #f9f9f9;
-}
-
-.sphere-container {
-  padding: 30px 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   background-color: white;
 }
 
 .input-container {
-  padding: 15px;
-  background-color: black;
   display: flex;
-  align-items: center;
+  padding: 15px 40px;
+  background-color: white;
+  box-shadow: 0px 4px 50px rgba(0, 0, 0, 0.08);
   justify-content: space-between;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  align-items: center;
 }
 
 .text-input-form {
   flex: 1;
   display: flex;
-  margin-right: 10px;
+   /* Увеличенный отступ между полем ввода и кнопкой */
+
 }
 
 .text-input {
   flex: 1;
   padding: 12px 15px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 20px;
-  background-color: rgba(255, 255, 255, 0.1);
-  color: white;
+  background-color: white;
+  color: black;
   font-size: 16px;
   outline: none;
   transition: border-color 0.3s ease;
 }
 
 .text-input::placeholder {
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(0, 0, 0, 0.5);
 }
 
 .text-input:focus {
-  border-color: rgba(255, 255, 255, 0.4);
+  border-color: rgba(0, 0, 0, 0.2);
 }
 
-.send-button {
-  background: none;
-  border: none;
+.send-button, .mic-button {
+  width: 60px;
+  height: 60px;
+  border-radius: 30px;
+  border: 1px solid white;
+  background-color: white;
+  margin-left: 20px;
+  color: #2A2A37;
   cursor: pointer;
-  color: white;
-  margin-left: 10px;
-  width: 40px;
-  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.1);
-  transition: background-color 0.2s ease;
+  transition: all 0.2s;
+  box-shadow: 0px 4px 50px rgba(0, 0, 0, 0.08);
+  position: relative;
+  overflow: hidden;
 }
 
-.send-button:hover {
-  background-color: rgba(255, 255, 255, 0.2);
+.send-button svg, .mic-button svg {
+  width: 24px;
+  height: 24px;
+  stroke: #2A2A37; /* Цвет иконок */
+  fill: none; /* Убираем заливку для SVG */
+  z-index: 2; /* Поднимаем иконки над фоном */
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-.chat-controls {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.clear-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #666;
-  width: 34px;
-  height: 34px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  transition: background-color 0.2s ease;
-}
-
-.clear-button:hover {
+.send-button:hover, .mic-button:hover {
   background-color: rgba(0, 0, 0, 0.05);
+}
+
+.mic-button.active {
+  background-color: white;
+}
+
+.mic-button.active::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  opacity: 0.1;
+  background: linear-gradient(90deg, #FF833F 0%, #FFC72F 7%, #E5FF3F 14%, #90FF41 20%, #43FF91 30%, #0FFBFF 44%, #4193FF 57%, #393FFF 67%, #A73BFF 79%, #FF37DA 89%, #FF3E3E 100%);
+  filter: blur(14px);
+}
+
+.equalizer-container {
+  padding: 15px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
 }
