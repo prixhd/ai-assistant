@@ -96,3 +96,22 @@
     opacity: 1;
   }
 }
+
+.system-message {
+  justify-content: center;
+}
+
+.system-message .message-content {
+  background-color: #f0f0f0;
+  color: #666;
+  font-style: italic;
+  border-radius: 10px;
+  max-width: 80%;
+  text-align: center;
+}
+
+.chat-hint {
+  font-size: 14px;
+  color: #888;
+  margin-top: 10px;
+}

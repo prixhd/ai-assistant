@@ -1,0 +1,14 @@
+/* src/styles/Equalizer.css */
+.equalizer-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 150px;
+  width: 250px;
+  position: relative;
+  margin: 0 auto;
+}
+
+.equalizer-canvas {
+  display: block;
+}

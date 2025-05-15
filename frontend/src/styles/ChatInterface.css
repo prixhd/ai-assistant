@@ -148,3 +148,27 @@
   from { transform: translateY(20px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
+
+.chat-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.clear-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+}
+
+.clear-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}

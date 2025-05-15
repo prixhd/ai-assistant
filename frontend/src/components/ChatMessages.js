@@ -16,13 +16,14 @@ const ChatMessages = ({ messages, isLoading }) => {
     <div className="chat-messages">
       {messages.length === 0 ? (
         <div className="empty-chat">
-          <p>Привет! Я голосовой помощник. Чем могу помочь?</p>
+          <p>Привет! Я голосовой помощник магазина 05.ру. Чем могу помочь?</p>
+          <p className="chat-hint">Вы можете спросить меня о товарах, ценах, акциях или доставке.</p>
         </div>
       ) : (
         messages.map((message, index) => (
           <div
             key={index}
-            className={`message ${message.isUser ? 'user-message' : 'ai-message'}`}
+            className={`message ${message.isUser ? 'user-message' : message.isSystem ? 'system-message' : 'ai-message'}`}
           >
             <div className="message-content">
               {message.isUser ? (
