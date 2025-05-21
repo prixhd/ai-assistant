@@ -12,12 +12,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Переменные окружения для API
-ENV OPENROUTER_API_KEY=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
-ENV OPENROUTER_MODEL=deepseek/deepseek-r1
-
-# Старые переменные (оставляем для совместимости)
-ENV DEEPSEEK_API_URL=https://api.deepseek.com/v1
+ENV DEEPSEEK_API_KEY=sk-7d5ddde5e74d4e089dfaad352e4bcbc0
 ENV DEEPSEEK_MODEL=deepseek-chat
+ENV DEEPSEEK_API_URL=https://api.deepseek.com/v1
 
 # Порт остается тем же
 EXPOSE 5000
