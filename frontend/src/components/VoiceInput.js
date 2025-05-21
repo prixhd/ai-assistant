@@ -52,7 +52,7 @@ const VoiceInput = ({ onTranscript, isListening, setIsListening }) => {
         recognition.start();
         setIsListening(true);
       } catch (error) {
-        console.error('Error starting speech recognition:', error);
+        console.error('Error starting speech recogniion:', error);
       }
     }
   };
