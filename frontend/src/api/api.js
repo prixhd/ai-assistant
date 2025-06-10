@@ -76,6 +76,7 @@ export const sendMessage = async (message) => {
     export const clearChatSession = async () => {
       try {
         const sessionId = getSessionId();
+        console.log('Clearing session ID:', sessionId); // Добавьте для отладки
 
         const response = await axios.post(`${API_URL}/clear-session`, {
           session_id: sessionId
@@ -86,8 +87,15 @@ export const sendMessage = async (message) => {
           }
         });
 
-        console.log('Session cleared:', response.data);
-        return { success: true, message: "История диалога очищена" };
+        console.log('Session cleared response:', response.data);
+
+        // Явно удаляем локальное хранение сообщений
+        localStorage.removeItem('chat_messages');
+
+        return {
+          success: true,
+          message: response.data.message || "История диалога очищена"
+        };
       } catch (error) {
         console.error('Error clearing session:', error);
         return { success: false, message: "Не удалось очистить историю диалога" };

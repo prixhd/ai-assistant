@@ -50,6 +50,40 @@ const ChatInterface = ({ isOpen, onClose }) => {
     };
   }, [isOpen, onClose]);
 
+  // Функция для взаимодействия с элементами на странице 05.ru
+  const highlightElement = (elementId) => {
+    // Проверяем, находимся ли мы в iframe или есть доступ к родительскому окну
+    try {
+      const targetWindow = window.parent !== window ? window.parent : window;
+      const element = targetWindow.document.getElementById(elementId);
+
+      if (element) {
+        // Сначала удаляем все предыдущие подсветки
+        const highlightedElements = targetWindow.document.querySelectorAll('.assistant-highlight');
+        highlightedElements.forEach(el => {
+          el.classList.remove('assistant-highlight');
+        });
+
+        // Добавляем класс подсветки
+        element.classList.add('assistant-highlight');
+
+        // Прокручиваем к элементу
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        // Удаляем подсветку через 5 секунд
+        setTimeout(() => {
+          element.classList.remove('assistant-highlight');
+        }, 5000);
+
+        return true;
+      }
+    } catch (error) {
+      console.error('Error highlighting element:', error);
+    }
+
+    return false;
+  };
+
   // Обработка отправки сообщения
   const handleSendMessage = async (text) => {
     if (!text.trim()) return;
@@ -73,6 +107,29 @@ const ChatInterface = ({ isOpen, onClose }) => {
         if (typeof aiResponse === 'string') {
           // Удаляем "undefined" в конце строки
           aiResponse = aiResponse.replace(/undefined$/, '');
+
+          // Проверяем, содержит ли ответ JSON с инструкциями для подсветки элементов
+          try {
+            if (aiResponse.includes('{') && aiResponse.includes('}')) {
+              const jsonMatch = aiResponse.match(/\{.*\}/s);
+              if (jsonMatch) {
+                const jsonStr = jsonMatch[0];
+                const jsonResponse = JSON.parse(jsonStr);
+
+                // Если JSON содержит указание на элемент для подсветки
+                if (jsonResponse.highlightElement) {
+                  highlightElement(jsonResponse.highlightElement);
+                }
+
+                // Если есть текст в JSON, используем его вместо полного ответа
+                if (jsonResponse.text) {
+                  aiResponse = jsonResponse.text;
+                }
+              }
+            }
+          } catch (e) {
+            console.error('Error processing JSON in response:', e);
+          }
         }
 
         const aiMessage = { text: aiResponse, isUser: false };
@@ -104,24 +161,33 @@ const ChatInterface = ({ isOpen, onClose }) => {
     handleSendMessage(inputText);
   };
 
-  // Очистка истории диалога
   const handleClearChat = async () => {
     try {
+      console.log("Clearing chat history...");
       const result = await clearChatSession();
-      if (result.success) {
-        setMessages([]);
-        localStorage.removeItem('chat_messages');
-        // Добавляем системное сообщение о начале нового диалога
+      console.log("Clear chat result:", result);
+
+      // Независимо от ответа сервера, очищаем локальный UI
+      setMessages([]);
+      localStorage.removeItem('chat_messages');
+
+      // Добавляем системное сообщение
+      setTimeout(() => {
         setMessages([{
           text: 'История диалога очищена. Начинаем новый разговор!',
           isUser: false,
           isSystem: true
         }]);
-      } else {
-        console.error('Failed to clear chat session:', result.message);
-      }
+      }, 100);
+
     } catch (error) {
-      console.error('Error clearing chat session:', error);
+      console.error('Error in handleClearChat:', error);
+      // Показываем сообщение об ошибке
+      setMessages(prev => [...prev, {
+        text: 'Произошла ошибка при очистке истории. Пожалуйста, попробуйте позже.',
+        isUser: false,
+        isSystem: true
+      }]);
     }
   };
 

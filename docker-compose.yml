@@ -14,12 +14,13 @@ services:
   ai-service:
     build: ./ai-service
     ports:
-      - "5001:5000"  # Порт 5001 на хосте
+      - "5001:5000"
     networks:
       - app-network
     environment:
-      - DEEPSEEK_API_KEY=sk-7d5ddde5e74d4e089dfaad352e4bcbc0
+      - DEEPSEEK_API_KEY=sk-e997ae4e616585fa09ad825ac49eb8d1a30e56fb4e311c73a69869e64ea81768
       - DEEPSEEK_MODEL=deepseek-chat
+      - DEEPSEEK_API_URL=https://api.deepseek.com/v1
     restart: on-failure
 
   frontend:
@@ -32,6 +33,14 @@ services:
       - REACT_APP_API_URL=http://localhost:5001
     depends_on:
       - backend
+    restart: unless-stopped
+
+  demo-site:
+    build: ./demo-site
+    ports:
+      - "8001:80"
+    networks:
+      - app-network
     restart: unless-stopped
 
 networks:
